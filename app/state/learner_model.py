@@ -69,7 +69,7 @@ class LearnerModel(BaseModel):
         default unknown state - no evidence, no assumptions. Use this
         for a brand-new student before Student Intake has run.
         """
-        return cls(
+        return cls( 
             motivation=EvidenceBackedHypothesis(),
             confidence=EvidenceBackedHypothesis(),
             curiosity=EvidenceBackedHypothesis(),
