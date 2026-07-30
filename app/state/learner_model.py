@@ -37,8 +37,8 @@ class EvidenceBackedHypothesis(BaseModel):
     changes; the reasoning shape stays identical.
     """
 
-    estimate: str
-    certainty: ConfidenceLevel
+    estimate: str = "unknown"
+    certainty: ConfidenceLevel = ConfidenceLevel.LOW
     supported_by: list[EvidenceId] = Field(default_factory=list)
     competing_evidence: list[EvidenceId] = Field(default_factory=list)
     last_updated: datetime = Field(default_factory=datetime.utcnow)
@@ -61,3 +61,19 @@ class LearnerModel(BaseModel):
     momentum: EvidenceBackedHypothesis
     frustration: EvidenceBackedHypothesis
     independence: EvidenceBackedHypothesis
+    
+    @classmethod
+    def new_unknown(cls) -> "LearnerModel":
+        """
+        Construct a LearnerModel with all six hypotheses in their
+        default unknown state - no evidence, no assumptions. Use this
+        for a brand-new student before Student Intake has run.
+        """
+        return cls(
+            motivation=EvidenceBackedHypothesis(),
+            confidence=EvidenceBackedHypothesis(),
+            curiosity=EvidenceBackedHypothesis(),
+            momentum=EvidenceBackedHypothesis(),
+            frustration=EvidenceBackedHypothesis(),
+            independence=EvidenceBackedHypothesis(),
+        )
