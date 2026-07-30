@@ -28,18 +28,19 @@ See docs/architecture.md and docs/learner_record.md for full detail. Architectur
 - Documentation written: README.md, docs/charter.md, docs/architecture.md, docs/learner_record.md, docs/departments.md, docs/roadmap.md
 - .env.example configured with placeholder keys
 
-### ILR Implementation - In Progress
+### ILR Implementation - Complete (Phase 12)
 - app/state/evidence.py - EvidenceEntry model, ConfidenceLevel enum, DepartmentName literal. Implemented and verified.
-- app/state/learner_model.py - EvidenceBackedHypothesis model, LearnerModel (motivation, confidence, curiosity, momentum, frustration, independence), EvidenceId alias. Implemented and verified.
+- app/state/learner_model.py - EvidenceBackedHypothesis model (with unknown-state defaults), LearnerModel (motivation, confidence, curiosity, momentum, frustration, independence), LearnerModel.new_unknown() convenience constructor, EvidenceId alias. Implemented and verified.
+- app/state/knowledge_map.py - MasteryLevel enum, KnowledgeConcept model, KnowledgeSubject, KnowledgeMap (grammar, vocabulary, kanji, listening, speaking, reading, writing, culture). Implemented and verified.
+- app/state/institutional_learner_record.py - root ILR object composing all of the above: Identity, Facts, Evidence Ledger, Learner Model, Educational History, Knowledge Map, World Engagement, Active Session, Institutional Notes, North Star, Metadata. Implemented and verified end to end.
 - ADR-005: Evidence is append-only
 - ADR-006: Department name is a Literal, not an Enum (for now)
 
 ### Next Up
-- app/state/institutional_learner_record.py - root ILR object: Identity, Facts, Educational History, Knowledge Map, World Engagement, Active Session, Institutional Notes, North Star, Metadata
-- app/state/knowledge_map.py - grammar, vocabulary, kanji, listening, speaking, reading, writing, culture, each with mastery/retention/evidence/next-step
-- LangGraph scaffolding (Phase 9)
-- Database scaffolding (Phase 10)
-- Department scaffolding (Phase 11)
+- LangGraph scaffolding (Phase 9): graph/builder.py, nodes.py, routing.py
+- Database scaffolding (Phase 10): database/models.py, session.py, repository.py
+- Department scaffolding (Phase 11): student_intake, conversation, reflection, curriculum, assessment - each with __init__.py, prompt.md, contract.py, node.py
+- First Week Milestone: Student -> Student Intake Department -> ILR Updated -> Saved -> Returned
 
 ## Working Principles
 - Update this README at the end of every completed work day.
