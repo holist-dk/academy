@@ -53,10 +53,16 @@ class LearnerModel(BaseModel):
     update these by writing new Evidence and revising the relevant
     hypothesis - they do not overwrite understanding without evidence
     behind the change.
+
+    Field named student_confidence, not confidence - to avoid clashing
+    with EvidenceBackedHypothesis.certainty, which is the Academy's
+    confidence in its own belief. Student confidence is a property of
+    the learner; certainty is a property of the Academy's hypothesis
+    about the learner. See ADR-007.
     """
 
     motivation: EvidenceBackedHypothesis
-    confidence: EvidenceBackedHypothesis
+    student_confidence: EvidenceBackedHypothesis
     curiosity: EvidenceBackedHypothesis
     momentum: EvidenceBackedHypothesis
     frustration: EvidenceBackedHypothesis
@@ -69,9 +75,9 @@ class LearnerModel(BaseModel):
         default unknown state - no evidence, no assumptions. Use this
         for a brand-new student before Student Intake has run.
         """
-        return cls( 
+        return cls(
             motivation=EvidenceBackedHypothesis(),
-            confidence=EvidenceBackedHypothesis(),
+            student_confidence=EvidenceBackedHypothesis(),
             curiosity=EvidenceBackedHypothesis(),
             momentum=EvidenceBackedHypothesis(),
             frustration=EvidenceBackedHypothesis(),

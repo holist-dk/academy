@@ -58,6 +58,14 @@ Providers (LLM, vector store, embeddings) are not created until first used, and 
 ### Idempotency
 Writes to the ILR must be safe to retry. A retried write (e.g. after a network blip or LangGraph retry-on-failure) must never duplicate the same evidence twice. Evidence entries should be checked or deterministically identified before insert.
 
+## Blackboard Execution Model (preventing death spirals)
+Three laws govern how the Blackboard executes - see ADR-008 for full rationale:
+1. Departments communicate only through the Blackboard. They never invoke, schedule, or reference other departments directly.
+2. LangGraph (the Control Shell) is the only scheduler. No department decides what runs next.
+3. A cycle terminates at a fixed point (no department has anything meaningful left to contribute) or at a hard iteration limit, whichever comes first. On hitting the limit, the system halts and surfaces to a human rather than looping silently.
+
+Departments only activate on new user input or a specific named condition (e.g. "new evidence since my last run"), never a background tick. Once no department has anything left to add, execution stops and waits for the student.
+
 ## Anti-Hallucination Measures
 - Small tool sets per department (a Reader sees ~3 tools, never 30).
 - Temperature = 0 for deterministic behavior.
