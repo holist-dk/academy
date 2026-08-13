@@ -31,6 +31,12 @@ No new technology unless it solves a problem actually encountered. No Kafka unti
 ## Architecture Decision Records (ADRs)
 Every significant decision gets a short written record: the problem, the decision, why it was chosen, alternatives rejected, and consequences. This prevents architecture drift and preserves the reasoning behind decisions as the project grows over months and years.
 
+## Deferred Ideas (not yet decided, not yet built)
+Ideas raised in discussion that are plausible but premature - logged here so they are not lost, not because they are scheduled. Revisit only once a real, encountered problem justifies them (per the Working Rule above).
+
+- Discovery / "waggle dance" model: Blackboard entries carrying richer metadata (importance, urgency, confidence, novelty, expected educational impact) instead of bare observations, so departments can prioritize attention rather than react to every write equally. Would require some department to compute these scores - new AI reasoning and schema that don't have a justified use yet with zero departments built.
+- Event-driven layer (Kafka, RabbitMQ, NATS, SQS, SNS, EventBridge, or similar) separate from the Blackboard, distinguishing transient "something happened" events from persistent Blackboard state. Matches the project's own Stage 3 roadmap language but is not justified until the current single-Blackboard model has actually been built and has hit a real limitation.
+
 ## Status Log
 Use this section to track what has actually been completed, updated at the end of each work day per the Founding Charter's working principles.
 
