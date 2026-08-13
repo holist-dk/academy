@@ -24,6 +24,7 @@ Additionally: no department may activate on a background tick or a generic "some
 
 Law 4 - Blackboard entries describe reality, never intent.
 An entry states what is true (e.g. "student required three hints," "curiosity has declined over four sessions"), never what should happen next (e.g. "Conversation Department should teach te-form," "Reflection should wake up"). Nothing written to the Blackboard may name, suggest, or imply which department should act on it - that would smuggle a scheduling decision into shared state and violate Law 1 and Law 2. Every department independently decides whether a given piece of Blackboard state is relevant to it.
+
 ## Supporting Practices (optimizations, not guarantees)
 These reduce how often the iteration limit is approached, but do not themselves guarantee termination - only Law 3 does that:
 - Activation contracts: departments define a specific, named condition for when they should run, not a vague "state changed" trigger.
