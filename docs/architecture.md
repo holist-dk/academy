@@ -59,12 +59,30 @@ Providers (LLM, vector store, embeddings) are not created until first used, and 
 Writes to the ILR must be safe to retry. A retried write (e.g. after a network blip or LangGraph retry-on-failure) must never duplicate the same evidence twice. Evidence entries should be checked or deterministically identified before insert.
 
 ## Blackboard Execution Model (preventing death spirals)
-Three laws govern how the Blackboard executes - see ADR-008 for full rationale:
+Four laws govern how the Blackboard executes - see ADR-008 for full rationale:
 1. Departments communicate only through the Blackboard. They never invoke, schedule, or reference other departments directly.
 2. LangGraph (the Control Shell) is the only scheduler. No department decides what runs next.
 3. A cycle terminates at a fixed point (no department has anything meaningful left to contribute) or at a hard iteration limit, whichever comes first. On hitting the limit, the system halts and surfaces to a human rather than looping silently.
+4. Blackboard entries describe reality, never intent. An entry states what is true, never what should happen next or which department should act on it - that would smuggle a scheduling decision into shared state.
 
 Departments only activate on new user input or a specific named condition (e.g. "new evidence since my last run"), never a background tick. Once no department has anything left to add, execution stops and waits for the student.
+
+## Information Lifecycle: Event, Blackboard State, or Institutional Memory
+Every piece of information the Academy handles belongs to exactly one of three tiers. Getting this sort right determines what gets persisted, in what shape, and for how long (this directly drives the Phase 10 database schema).
+
+### 1. Event (transient - deferred, not currently implemented)
+Something that happened, with no independent lifespan of its own - e.g. "student clicked next." In an event-driven layer, this would fire, trigger a reaction, and be discarded; it is not meant to be queried later as its own record. The Academy does not yet have a separate event layer (see Deferred Ideas in docs/roadmap.md) - today, what would be an "event" is simply a function call within a single LangGraph run. Revisit only once multiple departments need to react to the same happening independently and asynchronously.
+
+### 2. Blackboard state (working memory - in-session, not necessarily durable)
+What is true right now, during an active cycle. This is ActiveSession on the ILR (lesson, current_objective, pending_hypotheses, response_draft) - explicitly temporary, resets, does not need to survive a server restart or a day boundary. Test: is this just scratch space for the current interaction, or does it tell us something about the student worth keeping? If it is scratch space, it belongs here, not in durable storage.
+
+### 3. Institutional memory (durable - the rest of the ILR)
+Evidence Ledger, Learner Model, Knowledge Map, Educational History. The existing test from docs/learner_record.md applies directly: "Will remembering this make us a better teacher for this student in the future?" If yes, it belongs here, and (for Evidence specifically) it is append-only per ADR-005.
+
+### The Sorting Rule
+- Does it need to survive a network blip, restart, or day boundary? If no, it is Blackboard/Active Session scratch space.
+- Does remembering it forever make the Academy a better teacher later? If yes, it is institutional memory.
+- Is it "something happened, react now, then discard"? If yes, it belongs to the deferred event tier - not needed until multiple departments require independent, asynchronous reaction to the same happening.
 
 ## Anti-Hallucination Measures
 - Small tool sets per department (a Reader sees ~3 tools, never 30).
