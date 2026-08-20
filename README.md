@@ -17,6 +17,8 @@ The Academy is built on a Blackboard Architecture: specialist Departments (agent
 
 Orchestration is handled by LangGraph, which routes execution between Departments based on task phase. No Department decides what runs next; only the graph does. Four laws govern this execution model (ADR-008): departments communicate only through the Blackboard, LangGraph is the only scheduler, every cycle terminates at a fixed point or a hard iteration limit, and Blackboard entries describe reality, never intent (no entry may suggest which department should act on it).
 
+Information is organized into three lifecycle tiers (see docs/architecture.md, "Information Lifecycle"): events (deferred), Blackboard/Active Session state (temporary), and institutional memory (durable - Evidence Ledger, Learner Model, Knowledge Map, etc.). The database (ADR-009) follows the same three-layer split: append-only Evidence, mutable current-state tables for everything else, and a crash-recovery-only cache for Active Session.
+
 See docs/architecture.md and docs/learner_record.md for full detail. Architecture decisions are recorded in docs/adr/.
 
 ## Status
@@ -38,21 +40,30 @@ See docs/architecture.md and docs/learner_record.md for full detail. Architectur
 - app/graph/builder.py, nodes.py, routing.py - documented empty scaffolding, ready for Phase 11 departments to be wired in.
 - scripts/langgraph_toy/toy_graph.py - working reference example demonstrating the Control Shell pattern (state flow through nodes, iteration limit stopping a death spiral). Kept as a learning/reference artifact, not part of the real system.
 
+### Database Scaffolding - Complete (Phase 10)
+- app/database/models.py, session.py, repository.py - documented empty scaffolding, per ADR-009's three-layer persistence model (append-only Evidence, mutable current-state tables, cache-only Active Session).
+- Repository layer designed to be the only code allowed to touch the database directly - departments will call repository functions, never issue raw queries.
+
 ### Architecture Decision Records
 - ADR-005: Evidence is append-only
 - ADR-006: Department name is a Literal, not an Enum (for now)
 - ADR-007: Student confidence is a separate field from certainty (LearnerModel.student_confidence vs EvidenceBackedHypothesis.certainty)
-- ADR-008: Blackboard execution model - the four laws preventing death spirals (Law 4 added: Blackboard entries describe reality, never intent)
+- ADR-008: Blackboard execution model - the four laws preventing death spirals (Law 4: Blackboard entries describe reality, never intent)
+- ADR-009: Database persistence model - three layers (append-only Evidence, mutable current-state, cache-only Active Session). Documents a known, accepted gap: historical hypothesis states are not reconstructable until/unless Option B (a separate history/version table) is built.
 
 ### Deferred Ideas (see docs/roadmap.md for detail)
 - Discovery/"waggle dance" model - richer Blackboard entries with importance/urgency/confidence scoring
 - Event-driven layer (Kafka/RabbitMQ/NATS/etc.) separate from the Blackboard
-Both logged, not scheduled - revisit only once a real encountered problem justifies them.
+- LearnerModel/KnowledgeMap history/versioning (ADR-009 Option B) - revisit if reconstructing past hypothesis states becomes a real, encountered need
+All logged, not scheduled - revisit only once a real encountered problem justifies them.
 
-### Next Up
-- Database scaffolding (Phase 10): database/models.py, session.py, repository.py
-- Department scaffolding (Phase 11): student_intake, conversation, reflection, curriculum, assessment - each with __init__.py, prompt.md, contract.py, node.py, and an explicit activation contract per ADR-008
-- First Week Milestone: Student -> Student Intake Department -> ILR Updated -> Saved -> Returned
+### Next Up: Phase 11 - Department Scaffolding
+- Create the five initial department folders: student_intake, conversation, reflection, curriculum, assessment
+- Each gets the standard structure: __init__.py, prompt.md, contract.py, node.py
+- contract.py must define an explicit activation contract per ADR-008 (a specific, named condition for when the department runs - not a vague "state changed" trigger)
+- prompt.md written as constraints, not descriptions (per the Prompt Engineering as Constraint-Writing principle in docs/architecture.md)
+- This is the last structural phase before real department behavior gets implemented and wired into the LangGraph scaffolding from Phase 9
+- First Week Milestone (the actual proof of all of this working together): Student -> Student Intake Department -> ILR Updated -> Saved -> Returned
 
 ## Working Principles
 - Update this README at the end of every completed work day.
